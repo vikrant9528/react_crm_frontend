@@ -98,7 +98,7 @@ console.log(lead,'fsdfasfafafffdfsfsaf');
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
-    const timelineEvents: TimelineEvent[] = [...formData.timeline];
+    // const timelineEvents: TimelineEvent[] = [...formData.timeline];
     
     // if (lead.status !== formData.status) {
     //   timelineEvents.push({
@@ -304,7 +304,7 @@ console.log(lead,'fsdfasfafafffdfsfsaf');
                   <Input
                     id="edit-followupDate"
                     type="date"
-                    value={formData.followUp}
+                   value={formData.followUp ? new Date(formData.followUp).toISOString().split("T")[0] : ""}
                     onChange={(e) => setFormData({ ...formData, followUp: e.target.value })}
                     required
                   />

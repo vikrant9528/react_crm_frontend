@@ -34,7 +34,19 @@ const statusLabels = {
 
 export function FollowUpPage({ leads, setLeads, currentUser , token , allUser }: FollowUpPageProps) {
     useEffect(()=>{
-    api.get('/followups/'+ currentUser._id , {
+      getFollowUps();
+  },[])
+  const [editingLead, setEditingLead] = useState<Lead | null>(null);
+  const [followup , setFollowUp] = useState<any>('');
+  const [todayLeads , setodayLeads] = useState<any>('');
+  const [tomorrowLeads , settomorrowLeads] = useState<any>('');
+  const [upcomingLeads , setupcomingLeads] = useState<any>('')
+  const handleCall = (phone: string) => {
+    window.location.href = `tel:${phone}`;
+  };
+
+  const getFollowUps = () => {
+       api.get('/followups/'+ currentUser._id , {
       headers : {
         Authorization : `Bearer ${token}`
       }
@@ -46,20 +58,28 @@ export function FollowUpPage({ leads, setLeads, currentUser , token , allUser }:
         setodayLeads(followUpData.today);
         settomorrowLeads(followUpData.tomorrow);
         setupcomingLeads(followUpData.dayAfterTomorrow)
+        getLeadsAndUpdate();
       }
     })
     .catch((err)=>{
       console.log(err);
     })
-  },[])
-  const [editingLead, setEditingLead] = useState<Lead | null>(null);
-  const [followup , setFollowUp] = useState<any>('');
-  const [todayLeads , setodayLeads] = useState<any>('');
-  const [tomorrowLeads , settomorrowLeads] = useState<any>('');
-  const [upcomingLeads , setupcomingLeads] = useState<any>('')
-  const handleCall = (phone: string) => {
-    window.location.href = `tel:${phone}`;
-  };
+  }
+
+  const getLeadsAndUpdate = () => {
+      api.get('/leads/',{
+      headers : {
+        Authorization : `Bearer ${token}`
+      }
+    })
+    .then((res)=>{
+      setLeads(res.data.leads)
+      console.log(res);
+    })
+    .catch((err)=>{
+      console.log(err);
+    })
+  }
 
   const handleWhatsApp = (phone: string) => {
     const phoneNumber = phone.replace(/[^\d]/g, '');
@@ -67,11 +87,18 @@ export function FollowUpPage({ leads, setLeads, currentUser , token , allUser }:
   };
 
   const handleUpdateLead = (updatedLead: Lead) => {
-    setLeads(prev => {
-      const updated = prev.map(lead => lead._id === updatedLead._id ? updatedLead : lead);
-      localStorage.setItem('crm_leads', JSON.stringify(updated));
-      return updated;
-    });
+    api.put(`/leads/${updatedLead._id}`,updatedLead,{
+      headers : {
+        Authorization : `Bearer ${token}`
+      }
+    })
+    .then((res)=>{
+      getFollowUps();
+      console.log(res);
+    })
+    .catch((err)=>{
+      console.log(err);
+    })
   };
 
   const renderLeadCard = (lead: Lead) => (

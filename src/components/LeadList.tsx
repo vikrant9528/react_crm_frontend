@@ -8,6 +8,7 @@ import { AddLeadDialog } from './AddLeadDialog';
 import { EditLeadDialog } from './EditLeadDialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs';
 import type { Lead, User } from '../App';
+import {api} from '../api';
 
 interface LeadListProps {
   leads: Lead[];
@@ -48,6 +49,7 @@ export function LeadList({ leads, setLeads, currentUser , allUser }: LeadListPro
     
     return matchesSearch && matchesStatus;
   });
+    const authData = JSON.parse(localStorage.getItem('authData') || '[]')
 
   const handleAddLead = (newLead: Omit<Lead, 'id' | 'createdAt' | 'timeline'>) => {
     const lead: Lead = {
@@ -73,12 +75,41 @@ export function LeadList({ leads, setLeads, currentUser , allUser }: LeadListPro
   };
 
   const handleUpdateLead = (updatedLead: Lead) => {
-    setLeads(prev => {
-      const updated = prev.map(lead => lead._id === updatedLead._id ? updatedLead : lead);
-      localStorage.setItem('crm_leads', JSON.stringify(updated));
-      return updated;
-    });
+    console.log(updatedLead,'i am the updated lead');
+    api.put(`/leads/${updatedLead._id}`,updatedLead,{
+      headers : {
+        Authorization : `Bearer ${authData.token}`
+      }
+    })
+    .then((res)=>{
+      // setLeads(res.data.lead)
+      getLeadsAndUpdate();
+      console.log(res);
+    })
+    .catch((err)=>{
+      console.log(err);
+    })
+    // setLeads(prev => {
+    //   const updated = prev.map(lead => lead._id === updatedLead._id ? updatedLead : lead);
+    //   localStorage.setItem('crm_leads', JSON.stringify(updated));
+    //   return updated;
+    // });
   };
+
+  const getLeadsAndUpdate = () => {
+      api.get('/leads/',{
+      headers : {
+        Authorization : `Bearer ${authData.token}`
+      }
+    })
+    .then((res)=>{
+      setLeads(res.data.leads)
+      console.log(res);
+    })
+    .catch((err)=>{
+      console.log(err);
+    })
+  }
 
   return (
     <div className="space-y-6">
