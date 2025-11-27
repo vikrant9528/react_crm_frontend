@@ -142,7 +142,7 @@ export function LeadList({ leads, setLeads, currentUser , allUser }: LeadListPro
         <TabsList className="grid w-full grid-cols-3 lg:grid-cols-6">
           <TabsTrigger value="all">All</TabsTrigger>
           <TabsTrigger value="new">New</TabsTrigger>
-          <TabsTrigger value="interested">Interested</TabsTrigger>
+          {/* <TabsTrigger value="interested">Interested</TabsTrigger> */}
           <TabsTrigger value="not_interested" className="text-xs lg:text-sm">Not Interested</TabsTrigger>
           <TabsTrigger value="site_visit" className="text-xs lg:text-sm">Site Visit</TabsTrigger>
           <TabsTrigger value="closed">Closed</TabsTrigger>

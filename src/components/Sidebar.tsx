@@ -1,4 +1,4 @@
-import { Users, Calendar, User, X, LogOut } from "lucide-react";
+import { Users, Calendar, User, X, LogOut , Building , LayoutDashboard} from "lucide-react";
 import { Button } from './ui/button';
 import type { DashboardPage } from './Dashboard';
 
@@ -12,9 +12,11 @@ interface SidebarProps {
 
 export function Sidebar({ currentPage, onPageChange, isOpen, onClose, onLogout }: SidebarProps) {
   const menuItems = [
+    { id: 'dashboard' as DashboardPage, label: 'Dashboard', icon: LayoutDashboard },
     { id: 'leads' as DashboardPage, label: 'Leads', icon: Users },
     { id: 'followups' as DashboardPage, label: 'Follow Ups', icon: Calendar },
     { id: 'profile' as DashboardPage, label: 'Profile', icon: User },
+    { id: 'inventory' as DashboardPage, label: 'Inventory', icon: Building },
   ];
 
   const handlePageChange = (page: DashboardPage) => {

@@ -115,7 +115,7 @@ export function AddLeadDialog({ open, onOpenChange, onAddLead, currentUser ,allU
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="new">New</SelectItem>
-                <SelectItem value="interested">Interested</SelectItem>
+                {/* <SelectItem value="interested">Interested</SelectItem> */}
                 <SelectItem value="not_interested">Not Interested</SelectItem>
                 <SelectItem value="site_visit">Site Visit</SelectItem>
                 <SelectItem value="closed">Closed</SelectItem>

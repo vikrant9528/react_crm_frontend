@@ -41,8 +41,20 @@ export function FollowUpPage({ leads, setLeads, currentUser , token , allUser }:
   const [todayLeads , setodayLeads] = useState<any>('');
   const [tomorrowLeads , settomorrowLeads] = useState<any>('');
   const [upcomingLeads , setupcomingLeads] = useState<any>('')
-  const handleCall = (phone: string) => {
-    window.location.href = `tel:${phone}`;
+  const handleCall = (item: any) => {
+    const updatedCallTrack = item.call_track + 1;
+    api.put(`/leads/empTrack/${item._id}`,{call_track : updatedCallTrack},{
+      headers:{
+        Authorization:`Bearer ${token}`
+      }
+    }).then((res)=>{
+      if(res && res.data && !res.data.error){
+        window.location.href = `tel:${item.phone}`;
+        getFollowUps();
+      }
+    }).catch((err)=>{
+      console.log(err);
+    })
   };
 
   const getFollowUps = () => {
@@ -81,9 +93,39 @@ export function FollowUpPage({ leads, setLeads, currentUser , token , allUser }:
     })
   }
 
-  const handleWhatsApp = (phone: string) => {
-    const phoneNumber = phone.replace(/[^\d]/g, '');
-    window.open(`https://wa.me/${phoneNumber}`, '_blank');
+  const handleWhatsApp = (item:any) => {
+    const updatedTrack = (item.whatsapp_track || 0) + 1;
+    const phone = item.phone;
+    const message = encodeURIComponent(
+      "Thanks for reaching True Property Consulting. make your dream homes come true"
+    );
+    const appUrl = `whatsapp://send?phone=${phone}&text=${message}`;
+    const webUrl = `https://wa.me/${phone}?text=${message}`;
+    api.put(`/leads/empTrack/${item._id}`,{whatsapp_track:updatedTrack},{
+      headers:{
+        Authorization:`Bearer ${token}`
+      }
+    }).then((res)=>{
+      if(res.data && !res.data.error){
+          window.location.href = appUrl;
+          getFollowUps();
+        setTimeout(() => {
+          window.location.href = webUrl;
+        }, 700);
+      }
+    }).catch((err)=>{
+         console.error(err);
+    const phone = item.phone;
+    const message = encodeURIComponent(
+      "Thanks for reaching True Property Consulting. make your dream homes come true"
+    );
+    const appUrl = `whatsapp://send?phone=${phone}&text=${message}`;
+    const webUrl = `https://wa.me/${phone}?text=${message}`;
+    window.location.href = appUrl;
+    setTimeout(() => {
+      window.location.href = webUrl;
+    }, 700);
+    })
   };
 
   const handleUpdateLead = (updatedLead: Lead) => {
@@ -101,7 +143,7 @@ export function FollowUpPage({ leads, setLeads, currentUser , token , allUser }:
     })
   };
 
-  const renderLeadCard = (lead: Lead) => (
+  const renderLeadCard = (lead: any) => (
     <Card key={lead._id} className="p-4 hover:shadow-lg transition-shadow">
       <div className="space-y-3">
         <div className="flex items-start justify-between">
@@ -116,26 +158,43 @@ export function FollowUpPage({ leads, setLeads, currentUser , token , allUser }:
         </div>
 
         {lead.notes && (
-          <p className="text-sm text-gray-600">{lead.notes}</p>
+          <p className="text-sm text-gray-600 truncate">
+            {lead.notes.length > 10
+              ? lead.notes.slice(0, 10) + "..."
+              : lead.notes}
+          </p>
         )}
 
-        <div className="flex gap-2">
-          <Button
+        <div className="flex gap-1">
+          <Button 
             size="sm"
             variant="outline"
-            onClick={() => handleCall(lead.phone)}
-            className="flex-1"
+            onClick={() => handleCall(lead)}
+            className="flex-1 flex items-center gap-2"
           >
-            <Phone className="w-4 h-4 mr-2" />
+            <div className="relative">
+              <Phone className="w-4 h-4" />
+
+              {/* badge */}
+              <span className="absolute bg-red-900 text-red-500  h-4 w-4 flex items-center justify-center rounded-full trackBadgecall">
+                {lead.call_track}
+              </span>
+            </div>
+
             Call
           </Button>
           <Button
             size="sm"
             variant="outline"
-            onClick={() => handleWhatsApp(lead.phone)}
+            onClick={() => handleWhatsApp(lead)}
             className="flex-1"
           >
+            <div className='relative'>
             <MessageCircle className="w-4 h-4 mr-2" />
+              <span className="absolute bg-red-900 text-red-500  h-4 w-4 flex items-center justify-center rounded-full trackBadgewhatsapp">
+                {lead.whatsapp_track}
+              </span>
+            </div>
             WhatsApp
           </Button>
           <Button
@@ -174,7 +233,7 @@ export function FollowUpPage({ leads, setLeads, currentUser , token , allUser }:
 
         <TabsContent value="today" className="space-y-4 mt-6">
           {todayLeads.length > 0 ? (
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
               {todayLeads.map(renderLeadCard)}
             </div>
           ) : (

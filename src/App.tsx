@@ -3,6 +3,7 @@ import { LoginPage } from './components/LoginPage';
 import { SignupPage } from './components/SignupPage';
 import { Dashboard } from './components/Dashboard';
 import { api } from "./api";
+  import "./index.css";
 
 export type UserRole = 'admin' | 'employee';
 
@@ -41,6 +42,25 @@ export interface TimelineEvent {
   details: string;
 }
 
+export interface Project {
+  id: string;
+  name: string;
+  image: string;
+  type:
+    | "builder_floor"
+    | "apartment"
+    | "villa"
+    | "plot"
+    | "commercial";
+  totalUnits: number;
+  unitsAvailable: number;
+  unitsSold: number;
+  unitTypes: string[];
+  amenities: string[];
+  createdBy: string;
+  createdAt: string;
+}
+
 function App() {
   const [currentPage, setCurrentPage] = useState<'login' | 'signup' | 'dashboard'>('login');
   const [currentUser, setCurrentUser] = useState<User | null>(null);
@@ -48,27 +68,6 @@ function App() {
 
   // Initialize with demo users
   useEffect(() => {
-    // const storedUsers = localStorage.getItem('crm_users');
-    // if (!storedUsers) {
-    //   const demoUsers = [
-    //     {
-    //       id: '1',
-    //       email: 'admin@realestate.com',
-    //       password: 'admin123',
-    //       name: 'Admin User',
-    //       role: 'admin' as UserRole,
-    //     },
-    //     {
-    //       id: '2',
-    //       email: 'employee@realestate.com',
-    //       password: 'employee123',
-    //       name: 'John Employee',
-    //       role: 'employee' as UserRole,
-    //     },
-    //   ];
-      
-    //   localStorage.setItem('crm_users', JSON.stringify(demoUsers));
-    // }
     api.get('/users/'+authData._id)
     .then((res)=>{
       if(res && res.data && !res.data.error){
@@ -93,7 +92,7 @@ function App() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen bg-gray-50">
       {currentPage === 'login' && (
         <LoginPage
           onLogin={handleLogin}

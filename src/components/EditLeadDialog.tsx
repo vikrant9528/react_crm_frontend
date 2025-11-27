@@ -216,7 +216,7 @@ console.log(lead,'fsdfasfafafffdfsfsaf');
             </TabsList>
 
             <TabsContent value="details" className="space-y-4 mt-4">
-              <div className="flex gap-2 mb-4">
+              {/* <div className="flex gap-2 mb-4">
                 <Button variant="outline" onClick={handleCall} className="flex-1">
                   <Phone className="w-4 h-4 mr-2" />
                   Call
@@ -225,7 +225,7 @@ console.log(lead,'fsdfasfafafffdfsfsaf');
                   <MessageCircle className="w-4 h-4 mr-2" />
                   WhatsApp
                 </Button>
-              </div>
+              </div> */}
 
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div className="space-y-2">
@@ -272,7 +272,7 @@ console.log(lead,'fsdfasfafafffdfsfsaf');
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="new">New</SelectItem>
-                      <SelectItem value="interested">Interested</SelectItem>
+                      {/* <SelectItem value="interested">Interested</SelectItem> */}
                       <SelectItem value="not_interested">Not Interested</SelectItem>
                       <SelectItem value="site_visit">Site Visit</SelectItem>
                       <SelectItem value="closed">Closed</SelectItem>
