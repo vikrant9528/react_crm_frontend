@@ -199,7 +199,7 @@ export function FollowUpPage({ leads, setLeads, currentUser , token , allUser }:
           </Button>
           <Button
             size="sm"
-            onClick={() => {const leads = JSON.parse(JSON.stringify(lead));const id = leads.assignedTo._id;console.log(id,'i am id here okkay');delete leads.assignedTo;leads['assignedTo'] = id ; setEditingLead(leads) }}
+            onClick={() => {const leads = JSON.parse(JSON.stringify(lead));const id = leads.assignedTo._id;delete leads.assignedTo;leads['assignedTo'] = id ; setEditingLead(leads) }}
             className="flex-1"
           >
             View Details

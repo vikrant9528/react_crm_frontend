@@ -29,7 +29,7 @@ export interface Lead {
   assignedTo: string;
   createdBy: string;
   createdAt: string;
-  // siteVisitPhotos?: string[];
+  siteVisitPhotos?: string[];
   timeline: TimelineEvent[];
 }
 

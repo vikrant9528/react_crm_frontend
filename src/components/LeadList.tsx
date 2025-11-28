@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Plus, Search, Filter } from "lucide-react";
+import { Plus, Search, UploadCloud } from "lucide-react";
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Badge } from './ui/badge';
@@ -9,6 +9,8 @@ import { EditLeadDialog } from './EditLeadDialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs';
 import type { Lead, User } from '../App';
 import {api} from '../api';
+import * as XLSX from "xlsx";
+import { saveAs } from "file-saver";
 
 interface LeadListProps {
   leads: Lead[];
@@ -42,8 +44,8 @@ export function LeadList({ leads, setLeads, currentUser , allUser }: LeadListPro
   const filteredLeads = leads.filter(lead => {
     const matchesSearch = 
       lead.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      lead.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      lead.phone.includes(searchQuery);
+      lead.email.toLowerCase().includes(searchQuery.toLowerCase()) 
+      // lead.phone.includes(searchQuery);
     
     const matchesStatus = statusFilter === 'all' || lead.status === statusFilter;
     
@@ -52,27 +54,27 @@ export function LeadList({ leads, setLeads, currentUser , allUser }: LeadListPro
     const authData = JSON.parse(localStorage.getItem('authData') || '[]')
 
   const handleAddLead = (newLead: Omit<Lead, 'id' | 'createdAt' | 'timeline'>) => {
-    const lead: Lead = {
-      ...newLead,
-      createdAt: new Date().toISOString(),
-      timeline: [
-        {
-          id: Date.now().toString(),
-          timestamp: new Date().toISOString(),
-          userId: currentUser._id,
-          userName: currentUser.name,
-          action: 'Lead Created',
-          details: 'Initial contact established',
-        },
-      ],
-    };
-    console.log(lead,'fsdfasfsafasfasfasfasdsfad');
-    setLeads(prev => {
-      const updated = [...prev, lead];
-      localStorage.setItem('crm_leads', JSON.stringify(updated));
-      return updated;
-    });
+    if(newLead){
+      postLead(newLead);
+    }
   };
+
+  const postLead = (lead:any) => {
+    api.post('/leads',lead ,
+      {
+        headers:{
+          Authorization : `Bearer ${authData.token}`
+        }
+      }
+    ).then((res)=>{
+      console.log(res);
+      if(res && res.data && !res.data.error){
+        getLeadsAndUpdate();
+      }
+    }).catch((err)=>{
+      console.log(err);
+    })
+  }
 
   const handleUpdateLead = (updatedLead: Lead) => {
     console.log(updatedLead,'i am the updated lead');
@@ -111,6 +113,45 @@ export function LeadList({ leads, setLeads, currentUser , allUser }: LeadListPro
     })
   }
 
+   const exportToExcel = (leads:any) => {
+  const formattedLeads = leads.map((lead:any) => ({
+    Name: lead.name,
+    Phone: lead.phone,
+    Email: lead.email,
+    Source: lead.source,
+    Status: lead.status,
+    Budget: lead.budget,
+    Remark: lead.notes,
+    callTrack: lead.call_track,
+    whatsAppTrack: lead.whatsapp_track,
+    AssignedTo: lead.assignedTo?._id || "-",
+    EmployeeName: lead.assignedTo?.name || "-",
+    Role: lead.assignedTo?.role || "-",
+    FollowUp: lead.followUp
+      ? new Date(lead.followUp).toLocaleDateString()
+      : "-",
+    Time: lead.time,
+    CreatedAt: new Date(lead.createdAt).toLocaleDateString(),
+  }));
+
+  const worksheet = XLSX.utils.json_to_sheet(formattedLeads);
+  const workbook = {
+    Sheets: { Leads: worksheet },
+    SheetNames: ["Leads"],
+  };
+
+  const excelBuffer = XLSX.write(workbook, {
+    bookType: "xlsx",
+    type: "array",
+  });
+
+  const blob = new Blob([excelBuffer], {
+    type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+  });
+
+  saveAs(blob, `Leads_${Date.now()}.xlsx`);
+};
+
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
@@ -120,10 +161,16 @@ export function LeadList({ leads, setLeads, currentUser , allUser }: LeadListPro
             {currentUser.role === 'admin' ? 'All leads in the system' : 'Your assigned leads'}
           </p>
         </div>
+     <div className='flex gap-2'>
+     {currentUser.role === 'admin' && <Button onClick={() => exportToExcel(leads)}>
+          <UploadCloud className="w-4 h-4 mr-2" />
+          Export
+        </Button>}
         <Button onClick={() => setIsAddDialogOpen(true)}>
           <Plus className="w-4 h-4 mr-2" />
           Add Lead
         </Button>
+     </div>
       </div>
 
       <div className="flex flex-col sm:flex-row gap-4">
@@ -154,7 +201,7 @@ export function LeadList({ leads, setLeads, currentUser , allUser }: LeadListPro
           <Card
             key={lead._id}
             className="p-4 hover:shadow-lg transition-shadow cursor-pointer"
-            onClick={() => setEditingLead(lead)}
+            onClick={() => {const leads = JSON.parse(JSON.stringify(lead));const id = leads.assignedTo._id;delete leads.assignedTo;leads['assignedTo'] = id ; setEditingLead(leads)}}
           >
             <div className="space-y-3">
               <div className="flex items-start justify-between">
@@ -178,7 +225,7 @@ export function LeadList({ leads, setLeads, currentUser , allUser }: LeadListPro
                 <p className="text-sm text-gray-600 line-clamp-2">{lead.notes}</p>
               )}
 
-              {/* {lead.siteVisitPhotos && lead.siteVisitPhotos.length > 0 && (
+              {lead.siteVisitPhotos && lead.siteVisitPhotos.length > 0 && (
                 <div className="flex gap-2">
                   {lead.siteVisitPhotos.slice(0, 3).map((photo, idx) => (
                     <img
@@ -189,7 +236,7 @@ export function LeadList({ leads, setLeads, currentUser , allUser }: LeadListPro
                     />
                   ))}
                 </div>
-              )} */}
+              )}
             </div>
           </Card>
         ))}

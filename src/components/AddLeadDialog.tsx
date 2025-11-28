@@ -12,6 +12,9 @@ import { Label } from './ui/label';
 import { Textarea } from './ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 import type { Lead, User } from '../App';
+import { File } from "lucide-react";
+import { api } from '../api';
+import * as XLSX from "xlsx";
 
 interface AddLeadDialogProps {
   open: boolean;
@@ -23,6 +26,8 @@ interface AddLeadDialogProps {
 
 export function AddLeadDialog({ open, onOpenChange, onAddLead, currentUser ,allUser }: AddLeadDialogProps) {
   console.log(allUser,'fsdaffffffffffffffff')
+    const authData = JSON.parse(localStorage.getItem('authData') || '[]')
+
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -58,6 +63,41 @@ export function AddLeadDialog({ open, onOpenChange, onAddLead, currentUser ,allU
     });
     onOpenChange(false);
   };
+
+  const onFileChange = (event:any) => {
+  const file = event.target.files[0];
+  if (!file) return;
+
+  const fileReader = new FileReader();
+  fileReader.readAsArrayBuffer(file);
+
+  fileReader.onload = () => {
+    const buffer = fileReader.result;
+    const workbook = XLSX.read(buffer, { type: "array" });
+    const sheetName = workbook.SheetNames[0];
+    const sheet = workbook.Sheets[sheetName];
+    const jsonData = XLSX.utils.sheet_to_json(sheet);
+
+    console.log(jsonData);
+
+    if (jsonData) {
+      uploadExcelFile("/leads/importLeads", jsonData);
+    }
+  };
+};
+
+const uploadExcelFile = (endpoint:string ,data:any) =>{
+    api.post(endpoint , data ,{
+      headers:{
+        Authorization:`Bearer ${authData.token}`
+      }
+    }).then((res)=>{
+      console.log(res);
+    }).catch((err)=>{
+      console.log(err);
+    })
+}
+
   const colClass = currentUser.role == 'admin' ? 'grid grid-cols-2 gap-4' : 'grid grid-cols-1'
 
   return (
@@ -68,6 +108,19 @@ export function AddLeadDialog({ open, onOpenChange, onAddLead, currentUser ,allU
           <DialogDescription>
             Create a new lead and assign it to yourself
           </DialogDescription>
+            <div className='flex' style={{justifyContent:'flex-end'}}>
+            <Button  onClick={() => document.getElementById("excelInput")?.click()} className="w-fit ">
+          <File className="w-4 h-4 mr-1" />
+          Import Excel
+        </Button>
+        <input
+          id="excelInput"
+          type="file"
+          className="hidden"
+          accept=".xlsx,.xls,.csv"
+          onChange={onFileChange}
+        />
+            </div>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4">

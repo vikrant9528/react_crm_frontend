@@ -220,6 +220,7 @@ console.log(lead,'fsdfasfafafffdfsfsaf');
                 <Button variant="outline" onClick={handleCall} className="flex-1">
                   <Phone className="w-4 h-4 mr-2" />
                   Call
+                <p className='absolute right-[100px] top-0'>2</p>
                 </Button>
                 <Button variant="outline" onClick={handleWhatsApp} className="flex-1">
                   <MessageCircle className="w-4 h-4 mr-2" />
@@ -409,9 +410,9 @@ console.log(lead,'fsdfasfafafffdfsfsaf');
               </form>
             </TabsContent>
 
-            <TabsContent value="timeline" className="space-y-4 mt-4">
+            {/* <TabsContent value="timeline" className="space-y-4 mt-4">
               <div className="space-y-3">
-                {/* {formData.timeline.map((event) => (
+                {formData.timeline.map((event) => (
                   <Card key={event.id} className="p-4">
                     <div className="flex items-start gap-3">
                       <div className="w-2 h-2 bg-blue-600 rounded-full mt-2" />
@@ -427,9 +428,9 @@ console.log(lead,'fsdfasfafafffdfsfsaf');
                       </div>
                     </div>
                   </Card>
-                ))} */}
+                ))}
               </div>
-            </TabsContent>
+            </TabsContent> */}
           </Tabs>
         )}
       </DialogContent>
